@@ -1,0 +1,81 @@
+Problem 2 
+Given a string s, composed of different combinations of '(' , ')', '{', '}', '[', ']'. Determine whether the Expression is balanced or not. 
+
+CODE:
+#include <stdio.h>
+#include <string.h>
+#include <stdbool.h>
+#include <stdlib.h>
+
+#define MAX 1000001
+
+struct Stack {
+    char *arr;
+    int top;
+};
+
+void initStack(struct Stack* s) {
+    // Allocating on heap to handle large constraints 
+    s->arr = (char*)malloc(MAX * sizeof(char));
+    s->top = -1;
+}
+
+bool isEmpty(struct Stack* s) {
+    return s->top == -1;
+}
+
+void push(struct Stack* s, char c) {
+    s->arr[++(s->top)] = c;
+}
+
+char pop(struct Stack* s) {
+    if (isEmpty(s)) return '\0';
+    return s->arr[(s->top)--];
+}
+
+bool isBalanced(char* s) {
+    struct Stack stack;
+    initStack(&stack);
+    
+    int len = strlen(s);
+    for (int i = 0; i < len; i++) {
+        char c = s[i];
+        
+        // 1. Must handle ALL opening brackets [cite: 50]
+        if (c == '(' || c == '[' || c == '{') {
+            push(&stack, c);
+        }
+        // 2. Handle closing brackets [cite: 32]
+        else if (c == ')' || c == ']' || c == '}') {
+            if (isEmpty(&stack)) {
+                free(stack.arr);
+                return false;
+            }
+            
+            char top = pop(&stack);
+            
+            // Check for matching pairs [cite: 32, 33]
+            if ((c == ')' && top != '(') || 
+                (c == ']' && top != '[') || 
+                (c == '}' && top != '{')) {
+                free(stack.arr);
+                return false;
+            }
+        }
+    }
+    
+    bool result = isEmpty(&stack);
+    free(stack.arr);
+    return result;
+}
+
+int main() {
+
+    char* tests[] = {"[{()}]", "[()()][]", "([", "([{]})"};
+    
+    for(int i = 0; i < 4; i++) {
+        printf("Input: \"%s\" -> %s\n", tests[i], isBalanced(tests[i]) ? "true" : "false");
+    }
+    
+    return 0;
+}
